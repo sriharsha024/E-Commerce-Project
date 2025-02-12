@@ -37,9 +37,9 @@ public class CategoryController {
             categoryService.createCategory(category);
             return new ResponseEntity<>("Category created successfully", HttpStatus.CREATED);
         } catch (ResponseStatusException e) {
+            System.err.println("Error: " + e.getMessage());
             return new ResponseEntity<>("Error creating category: " + e.getReason(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @PutMapping("/admin/categories/{categoryId}")
