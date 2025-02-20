@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Entity(name = "categories")
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="categories")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long categoryId;
+    private Long categoryId;
+
     @NotBlank
-    @Size(min =5, message = "Category Name should be atleast 5 characters")
+    @Size(min = 5, message = "Category name must contain atleast 5 characters")
     private String categoryName;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)

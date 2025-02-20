@@ -1,10 +1,15 @@
 package com.ecommerce.project.security.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
+@Setter
+@Getter
 public class MessageResponse {
     private String message;
+
+    public MessageResponse(String message) {
+        this.message = message;
+    }
+
 }

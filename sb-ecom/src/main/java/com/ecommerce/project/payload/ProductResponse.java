@@ -9,11 +9,15 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class ProductResponse {
     private List<ProductDTO> content;
+
     private Integer pageNumber;
     private Integer pageSize;
     private Long totalElements;
     private Integer totalPages;
-    private boolean last;
+    private boolean lastPage;
+
+
 }

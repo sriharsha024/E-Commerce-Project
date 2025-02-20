@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product,Long> {
+public interface ProductRepo extends JpaRepository<Product, Long> {
 
-    Page<Product> findByProductNameLikeIgnoreCase(String keyword, Pageable pageable);
+    Page<Product> findByCategoryOrderByPriceAsc(Category category, Pageable pageDetails);
 
-    Page<Product> findByCategory(Category category, Pageable pageable);
+    Page<Product> findByProductNameLikeIgnoreCase(String keyword, Pageable pageDetails);
 }

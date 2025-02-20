@@ -1,3 +1,4 @@
+
 package com.ecommerce.project.payload;
 
 import lombok.AllArgsConstructor;
@@ -8,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDTO {
-    private long CategoryId;
-    private String CategoryName;
+    private Long categoryId;
+    private String categoryName;
 }

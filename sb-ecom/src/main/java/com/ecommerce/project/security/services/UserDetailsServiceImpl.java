@@ -11,18 +11,18 @@ import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.UserRepo;
 
 @Service
-public class UserDetailServiceImpl implements UserDetailsService {
-
+public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     UserRepo userRepo;
 
     @Override
-    @Transactional//this method is atomic. It provides consistency.
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        User user = userRepo.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+
         return UserDetailsImpl.build(user);
     }
 
-}
 
+}

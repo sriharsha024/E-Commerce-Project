@@ -11,23 +11,19 @@ import java.util.UUID;
 
 @Service
 public class FileServiceImpl implements FileService {
+
     @Override
     public String uploadImage(String path, MultipartFile file) throws IOException {
-        //Filenames of original file
         String originalFilename = file.getOriginalFilename();
-        //Generate a unique filename
-        String randomId= UUID.randomUUID().toString();
-        //mat.jpg -> 1234 --> 1234.jpg
-        String fileName=randomId.concat(originalFilename.substring(originalFilename.lastIndexOf(".")));
-        String filePath=path+ File.separator+fileName;
-        //Check if path exist and create
-        File folder=new File(path);
-        if(!folder.exists()){
+
+        String randomId = UUID.randomUUID().toString();
+        String fileName = randomId.concat(originalFilename.substring(originalFilename.lastIndexOf(".")));
+        String filePath = path + File.separator + fileName;
+        File folder = new File(filePath);
+        if (!folder.exists()) {
             folder.mkdir();
         }
-        //upload to server
         Files.copy(file.getInputStream(), Paths.get(filePath));
-        //returning file name
         return fileName;
     }
 }
