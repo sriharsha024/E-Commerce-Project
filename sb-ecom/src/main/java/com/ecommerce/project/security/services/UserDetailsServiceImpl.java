@@ -12,6 +12,7 @@ import com.ecommerce.project.repository.UserRepo;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
+
     @Autowired
     UserRepo userRepo;
 
