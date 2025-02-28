@@ -1,74 +1,35 @@
 import { useEffect } from "react";
-import ProductCard from "./ProductCard";
+import ProductCard from "../shared/ProductCard";
 import { FaExclamationTriangle, FaSpinner } from "react-icons/fa";
 import{useDispatch, useSelector} from "react-redux";
-import { fetchProducts } from "../store/actions";
+import { fetchCategories, fetchProducts } from "../../store/actions";
+import Filter from "./Filter";
+import Paginations from "../shared/Paginations";
+import useProductFilter from "../../hooks/useProductFilter";
 
 const Products = () => {
-    const isLoading = false;
-    const errorMessage = "";
-    const {products}=useSelector(
+    const{isLoading,errorMessage}=useSelector(
+        (state)=>state.errors
+    )
+    const {products,categories,pagination}=useSelector(
         (state)=>state.products
     )
     const dispatch =useDispatch();
 
+    useProductFilter()
     useEffect(()=>{
-        dispatch(fetchProducts());
+        dispatch(fetchCategories());
     },[dispatch])
-
-    console.log()
-    /*const products = [
-        {
-            productId: 2,
-            productName: "Bewakoof",
-            productDescription: "Latest model tshirt",
-            productImage: "https://placehold.co/600x400",
-            quantity: 0,
-            price: 1000.00,
-            discount: 20.0,
-            specialProductPrice: 800.00,
-        },
-        {
-            productId: 4,
-            productName: "Basics",
-            productDescription: "Latest model Shirt",
-            productImage: "https://placehold.co/600x400",
-            quantity: 20,
-            price: 2000.00,
-            discount: 25.0,
-            specialProductPrice: 1500.00,
-        },
-        {
-            productId: 7,
-            productName: "Mufti",
-            productDescription: "Latest model Pant",
-            productImage: "https://placehold.co/600x400",
-            quantity: 10,
-            price: 4000.00,
-            discount: 25.0,
-            specialProductPrice: 3000.00,
-        },
-        {
-            productId: 15,
-            productName: "H&M",
-            productDescription: "Latest model tshirt",
-            productImage: "https://placehold.co/600x400",
-            quantity: 500,
-            price: 1500.00,
-            discount: 20.0,
-            specialProductPrice: 1200.00,
-        }
-    ];*/
-
 
     return (
         <div className="lg:px-14 sm:px-8 px-4 py-14 2xl:w-[90%] 2xl:mx-auto">
+            <Filter categories={categories? categories:[]}/>
             {
                 isLoading ? (
                     <div className="flex justify-center items-center h-[200px]">
                         <FaSpinner className="text-4xl text-blue-500 animate-spin mr-2" />
                         <span className="text-slate-800 text-lg font-medium">
-                            Loading...
+                            Loading... Please wait 
                         </span>
                     </div>
                 ) : errorMessage ? (
@@ -91,6 +52,11 @@ const Products = () => {
                             {products.map((item, i) => (
                                 <ProductCard key={i} {...item} />
                             ))}
+                        </div>
+                        <div className="flex justify-center items-center p-4">
+                        <Paginations
+                        numberOfPages={pagination?.totalPages}
+                        totalProducts={pagination?.totalElements}/>
                         </div>
                     </div>
                 )

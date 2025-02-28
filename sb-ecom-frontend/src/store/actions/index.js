@@ -11,9 +11,10 @@ const initialState = {
     },
 };
 
-export const fetchProducts = () => async (dispatch) => {
+export const fetchProducts = (queryString) => async (dispatch) => {
     try {
-        const { data } = await api.get(`/public/products`);
+        dispatch({ type: "IS_FETCHING" });
+        const { data } = await api.get(`/public/products?${queryString}`);
         dispatch({
             type: "FETCH_PRODUCTS",
             payload: data.content,
@@ -23,27 +24,37 @@ export const fetchProducts = () => async (dispatch) => {
             totalPages: data.totalPages,
             lastPage: data.lastPage,
         });
+        dispatch({ type: "IS_SUCCESS" });
     } catch (error) {
         console.log(error);
+        dispatch({
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "FAILED TO FETCH PRODUCTS",
+        });
     }
 };
 
-export const productReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case "FETCH_PRODUCTS":
-            return {
-                ...state,
-                products: action.payload,
-                pagination: {
-                    ...state.pagination,
-                    pageNumber: action.pageNumber,
-                    pageSize: action.pageSize,
-                    totalElements: action.totalElements,
-                    totalPages: action.totalPages,
-                    lastPage: action.lastPage,
-                },
-            };
-        default:
-            return state;
+
+
+export const fetchCategories = () => async (dispatch) => {
+    try {
+        dispatch({ type: "CATEGORY_LOADER" });
+        const { data } = await api.get(`/public/categories`);
+        dispatch({
+            type: "FETCH_CATEGORIES",
+            payload: data.content,
+            pageNumber: data.pageNumber,
+            pageSize: data.pageSize,
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            lastPage: data.lastPage,
+        });
+        dispatch({ type: "CATEGORY_SUCCESS" });
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "FAILED TO FETCH CATEGORIES",
+        });
     }
 };

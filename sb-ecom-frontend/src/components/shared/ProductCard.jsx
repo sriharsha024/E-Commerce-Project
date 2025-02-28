@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import ProductViewModel from "./ProductViewModel";
+import truncateText from "../../utils/truncateText";
 
 const ProductCard = ({
     productId,
@@ -50,14 +51,14 @@ const ProductCard = ({
                     price,
                     discount,
                     specialProductPrice,
-                })}} className="text-lg font-semibold mb-2 cursor-pointer">{productName}</h2>
+                })}} className="text-lg font-semibold mb-2 cursor-pointer">{truncateText(productName,50)}</h2>
                 <div className="min-h-20 max-h-20">
-                    <p className="text-gray-600 text-sm">{productDescription}</p>
+                    <p className="text-gray-600 text-sm">{truncateText(productDescription,80)}</p>
                 </div>
                 <div className="flex items-center justify-between">
                     {specialProductPrice ? (
                         <div className="flex flex-col">
-                            <span className="text-gray-400 line-through">₹{Number(price).toFixed(2)}</span>
+                             <span className="text-gray-400 line-through">₹{Number(price).toFixed(2)}</span>
                             <span className="text-xl font-bold text-slate-700">₹{Number(specialProductPrice).toFixed(2)}</span>
                         </div>
                     ) : (
