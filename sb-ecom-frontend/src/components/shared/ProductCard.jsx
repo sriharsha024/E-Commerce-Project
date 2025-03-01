@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import ProductViewModel from "./ProductViewModel";
 import truncateText from "../../utils/truncateText";
+import{useDispatch} from "react-redux";
+import { addToCart } from "../../store/actions";
+import toast from "react-hot-toast";
 
 const ProductCard = ({
     productId,
@@ -17,11 +20,15 @@ const ProductCard = ({
     const buttonLoader = false;
     const [selectedViewProduct, setSelectedViewProduct] = useState("");
     const isAvailable = quantity && Number(quantity) > 0;
+    const dispatch=useDispatch();
     const handleProductView = (product) => {
         setSelectedViewProduct(product);
         setOpenProductViewModel(true);
     };
 
+    const addToCartHandler=(cartItems)=>{
+        dispatch(addToCart(cartItems,1,toast));
+    }
     return (
         <div className="border rounded-lg shadow-xl overflow-hidden transition-shadow duration-300 bg-white hover:shadow-2xl">
             <div onClick={() => { handleProductView({
@@ -68,7 +75,15 @@ const ProductCard = ({
                     )}
                     <button 
                     disabled={!isAvailable || buttonLoader}
-                    onClick={() => {}}
+                    onClick={() =>addToCartHandler({
+                        productImage,
+                        productName,
+                        productDescription,
+                        specialProductPrice,
+                        price,
+                        productId,
+                        quantity,
+                    })}
                     className={`bg-blue-500 text-white px-4 py-2 rounded-lg items-center duration-300 flex justify-center ${isAvailable ? "opacity-100 hover:bg-blue-600" : "opacity-70 cursor-not-allowed"}`}>
                         <FaShoppingCart className="mr-2" />
                         {isAvailable ? "Add to cart" : "Stock out"}
