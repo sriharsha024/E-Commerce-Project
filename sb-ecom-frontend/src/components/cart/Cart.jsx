@@ -1,22 +1,35 @@
-
 import { Button } from "@headlessui/react";
 import { MdArrowBack, MdShoppingCart } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import ItemContent from "./ItemContent";
 import CartEmpty from "./CartEmpty";
 
 const Cart = () => {
     const dispatch = useDispatch();
     const { cart } = useSelector((state) => state.carts);
-    const newCart = { ...cart };
-    newCart.totalPrice = cart?.reduce(
-        (acc, cur) => acc + Number(cur?.productSpecialPrice) * Number(cur?.quantity), 0
-    );
 
-    if(!cart || cart.length===0){
-        return(<CartEmpty/>);
+    const [totalPrice, setTotalPrice] = useState(0);
+
+    useEffect(() => {
+        if (Array.isArray(cart)) {
+            const newTotal = cart.reduce(
+                (acc, cur) => acc + Number(cur?.specialProductPrice || 0) * Number(cur?.quantity || 0),
+                0
+            );
+            setTotalPrice(newTotal);
+        }
+    }, [cart]); // Recalculate whenever cart changes
+
+    const handleQuantityChange = (id, newQuantity) => {
+        dispatch(updateCart(id, newQuantity)); // Dispatch action to update Redux state
+    };
+
+    if (!cart || cart.length === 0) {
+        return <CartEmpty />;
     }
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
             {/* Cart Header */}
@@ -33,17 +46,21 @@ const Cart = () => {
                 <div>Total</div>
             </div>
 
+            {/* Cart Items */}
             <div>
-                {cart && cart.length > 0 &&
-                    cart.map((item, i) => <ItemContent key={i} {...item} />)}
+                {cart.map((item, i) => (
+                    <ItemContent key={i} {...item} onQuantityChange={handleQuantityChange} />
+                ))}
             </div>
 
             {/* Subtotal & Checkout */}
             <div className="mt-6 flex flex-col items-end border-t pt-4">
                 <div className="text-lg font-semibold">
-                    <span>Subtotal: ₹{newCart.totalPrice}</span>
+                    <span>Subtotal: ₹{totalPrice}</span>
                 </div>
-                <p className="text-gray-500 text-sm mt-1 text-right">Taxes and shipping calculated at checkout</p>
+                <p className="text-gray-500 text-sm mt-1 text-right">
+                    Taxes and shipping calculated at checkout
+                </p>
                 <div className="flex gap-4 mt-4">
                     <Link to="/checkout">
                         <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
@@ -51,7 +68,6 @@ const Cart = () => {
                             Checkout
                         </Button>
                     </Link>
-                    <br/>
                     <Link to="/products" className="flex items-center gap-2 text-blue-500 hover:text-blue-800 font-medium">
                         <MdArrowBack className="text-xl" />
                         Continue Shopping

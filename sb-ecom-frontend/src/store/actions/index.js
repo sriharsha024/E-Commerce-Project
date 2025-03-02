@@ -79,76 +79,102 @@ export const addToCart=(data,qty=1,toast)=>
     
 }
 
-export const increaseCartQuantity = 
-    (data, toast, setCurrentQuantity) => 
-    (dispatch, getState) => {
-        const { products } = getState().products;
-        let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+export const increaseCartQuantity = (data) => (dispatch, getState) => {
+    const { products } = getState().products;
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
-        const getProduct = products.find(item => item.productId === data.productId);
-        if (!getProduct) {
-            toast.error("Product not found");
-            return;
-        }
+    const getProduct = products.find(item => item.productId === data.productId);
+    if (!getProduct) return;
 
-        // Get existing quantity from localStorage
-        let existingItem = cartItems.find(item => item.productId === data.productId);
-        let currentQuantity = existingItem ? existingItem.quantity : 0;
+    let existingItem = cartItems.find(item => item.productId === data.productId);
+    let currentQuantity = existingItem ? existingItem.quantity : 0;
 
-        if (getProduct.quantity > currentQuantity) {
-            const newQuantity = currentQuantity + 1;
-            setCurrentQuantity(newQuantity);
+    if (getProduct.quantity > currentQuantity) {
+        const newQuantity = currentQuantity + 1;
+        dispatch({
+            type: "ADD_CART",
+            payload: { ...data, quantity: newQuantity },
+        });
 
-            // Update the cart in localStorage
-            if (existingItem) {
-                cartItems = cartItems.map(item =>
-                    item.productId === data.productId ? { ...item, quantity: newQuantity } : item
-                );
-            } else {
-                cartItems.push({ ...data, quantity: newQuantity });
-            }
+        const updatedCart = cartItems.map(item =>
+            item.productId === data.productId ? { ...item, quantity: newQuantity } : item
+        );
+        localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    }
+};
 
-            dispatch({
-                type: "ADD_CART",
-                payload: { ...data, quantity: newQuantity },
-            });
+export const decreaseCartQuantity = (data) => (dispatch, getState) => {
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    let existingItem = cartItems.find(item => item.productId === data.productId);
+    let currentQuantity = existingItem ? existingItem.quantity : 1;
 
-            localStorage.setItem("cartItems", JSON.stringify(cartItems));
-        } else {
-            toast.error("Quantity Reached to Limit");
-        }
-    };
+    if (currentQuantity > 1) {
+        const newQuantity = currentQuantity - 1;
 
-export const decreaseCartQuantity = 
-    (data, setCurrentQuantity) => 
-    (dispatch, getState) => {
-        let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-        let existingItem = cartItems.find(item => item.productId === data.productId);
-        let currentQuantity = existingItem ? existingItem.quantity : 1;
+        dispatch({
+            type: "ADD_CART",
+            payload: { ...data, quantity: newQuantity },
+        });
 
-        if (currentQuantity > 1) {
-            const newQuantity = currentQuantity - 1;
-            setCurrentQuantity(newQuantity);
+        const updatedCart = cartItems.map(item =>
+            item.productId === data.productId ? { ...item, quantity: newQuantity } : item
+        );
+        localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    }
+};
 
-            // Update the cart in localStorage
-            cartItems = cartItems.map(item =>
-                item.productId === data.productId ? { ...item, quantity: newQuantity } : item
-            );
-
-            dispatch({
-                type: "ADD_CART",
-                payload: { ...data, quantity: newQuantity },
-            });
-
-            localStorage.setItem("cartItems", JSON.stringify(cartItems));
-        } else {
-            toast.error("Minimum quantity reached");
-        }
-    };
 export const removeFromCart = (productId, toast) => (dispatch, getState) => {
     dispatch({ type: "REMOVE_CART", payload: productId });
 
     toast.success("Item removed from cart.");
     const updatedCart = getState().carts.cart.filter(item => item.productId !== productId);
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+};
+
+export const authenticateSignInUser=(sendData,toast,reset,navigate,setLoader)=>async(dispatch)=>{
+    try{
+        setLoader(true);
+        const {data}=await api.post("/auth/signin",sendData);
+        dispatch({type:"LOGIN_USER",payload:data});
+        localStorage.setItem("auth",JSON.stringify(data));
+        reset();
+        toast.success("Login success.");
+        navigate("/");
+    }
+    catch(error){
+        console.log(error);
+        toast.error(error?.response?.data?.message||"Internal Server Error");   
+    }
+    finally{
+        setLoader(false);
+    }
+}
+
+export const registerNewUser=(sendData,toast,reset,navigate,setLoader)=>async(dispatch)=>{
+    try{
+        setLoader(true);
+        const {data}=await api.post("/auth/signup",sendData);
+        localStorage.setItem("auth",JSON.stringify(data));
+        reset();
+        toast.success(data?.message || "User registered successfully.");
+        navigate("/login");
+    }
+    catch(error){
+        console.log(error);
+        toast.error(error?.response?.data?.message||"Internal Server Error");   
+    }
+    finally{
+        setLoader(false);
+    }
+
+}
+
+export const logOutUser = (navigate) => (dispatch) => {
+    dispatch({ type: "LOG_OUT" });
+    localStorage.removeItem("auth");
+
+    setTimeout(() => {
+        navigate("/login");
+        window.location.reload(); 
+    }, 10);
 };
