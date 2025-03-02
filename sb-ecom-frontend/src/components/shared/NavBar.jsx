@@ -2,11 +2,12 @@ import { FaShoppingCart, FaSignInAlt, FaStore } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import { Badge } from '@mui/material'; // Import Badge from Material-UI
 import { useState } from 'react';
+import { useSelector } from "react-redux";
 
-const NavBar = ({ user, cart }) => {
+const NavBar = ({ user}) => {
   const location = useLocation();
   const path = location.pathname;
-  const cartItemCount = cart?.length || 0; // Dynamically set the cart item count
+  const{cart} =useSelector((state)=>state.carts)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Helper function to apply styles based on active path
@@ -61,7 +62,7 @@ const NavBar = ({ user, cart }) => {
               <Link className={`${path === "/cart" ? "text-white font-semibold" : "text-gray-200"}`} to="/cart">
                 <Badge
                   showZero
-                  badgeContent={cartItemCount}
+                  badgeContent={cart?.length || 0}
                   color="primary"
                   overlap="circular"
                   anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
