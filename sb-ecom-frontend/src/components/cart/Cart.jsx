@@ -20,10 +20,10 @@ const Cart = () => {
             );
             setTotalPrice(newTotal);
         }
-    }, [cart]); // Recalculate whenever cart changes
+    }, [cart]); 
 
     const handleQuantityChange = (id, newQuantity) => {
-        dispatch(updateCart(id, newQuantity)); // Dispatch action to update Redux state
+        dispatch(updateCart(id, newQuantity)); 
     };
 
     if (!cart || cart.length === 0) {
@@ -32,13 +32,12 @@ const Cart = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-            {/* Cart Header */}
+
             <div className="flex justify-center items-center gap-2 border-b pb-4 mb-4">
                 <MdShoppingCart className="text-2xl text-blue-600" />
                 <h1 className="text-xl font-semibold">Your Cart</h1>
             </div>
 
-            {/* Cart Items Header */}
             <div className="grid grid-cols-5 text-gray-600 font-medium py-2 border-b text-center">
                 <div className="col-span-2">Product</div>
                 <div>Price</div>
@@ -46,14 +45,12 @@ const Cart = () => {
                 <div>Total</div>
             </div>
 
-            {/* Cart Items */}
             <div>
                 {cart.map((item, i) => (
                     <ItemContent key={i} {...item} onQuantityChange={handleQuantityChange} />
                 ))}
             </div>
 
-            {/* Subtotal & Checkout */}
             <div className="mt-6 flex flex-col items-end border-t pt-4">
                 <div className="text-lg font-semibold">
                     <span>Subtotal: ₹{totalPrice}</span>
@@ -61,14 +58,15 @@ const Cart = () => {
                 <p className="text-gray-500 text-sm mt-1 text-right">
                     Taxes and shipping calculated at checkout
                 </p>
-                <div className="flex gap-4 mt-4">
+                <div className="flex flex-col gap-4 mt-4">
                     <Link to="/checkout">
                         <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
                             <MdShoppingCart className="text-xl" />
                             Checkout
                         </Button>
                     </Link>
-                    <Link to="/products" className="flex items-center gap-2 text-blue-500 hover:text-blue-800 font-medium">
+
+                    <Link to="/products" className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-medium">
                         <MdArrowBack className="text-xl" />
                         Continue Shopping
                     </Link>

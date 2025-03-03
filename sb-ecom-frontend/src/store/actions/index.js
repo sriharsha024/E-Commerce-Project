@@ -178,3 +178,48 @@ export const logOutUser = (navigate) => (dispatch) => {
         window.location.reload(); 
     }, 10);
 };
+
+export const addUpdateUserAddress = (sendData,toast,addressId,setOpenAddressModal) => async (dispatch,getState) => {
+
+    //const {user}=getState().auth;
+    dispatch({ type: "BUTTON_LOADER" });
+    try{
+        if(!addressId){
+            const {data}=await api.post("/addresses",sendData);
+        }
+        else{
+            await api.put(`/addresses/${addressId}`, sendData);
+        }
+        dispatch(getUserAddresses())
+        toast.success("Address saved successfully.");
+        dispatch({ type: "IS_SUCCESS"});  
+    }
+    catch(error){
+        console.log(error);
+        toast.error(error?.response?.data?.message||"Internal Server Error"); 
+        dispatch({ type: "IS_ERROR",payload:null });  
+    }
+    finally{
+        setOpenAddressModal(false);
+    }
+};
+
+export const getUserAddresses = () => async (dispatch, getState) => {
+    try {
+        dispatch({ type: "IS_FETCHING" });
+        const { data } = await api.get(`/users/addresses`);
+        dispatch({ type: "USER_ADDRESSES", payload: data }); 
+        dispatch({ type: "IS_SUCCESS" });
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "Failed to fetch user addresses",
+        });
+    }
+};
+
+export const selectedUserCheckoutAddress = (address) => ({
+    type: "SELECTED_CHECKOUT_ADDRESS",
+    payload: address,
+});
