@@ -3,19 +3,40 @@ import { FaAddressBook } from "react-icons/fa";
 import Skeleton from "../shared/Skeleton";
 import AddressInfoModal from "./AddressInfoModal";
 import AddAddressForm from "./AddAddressForm";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AddressList from "./AddressList";
+import { DeleteModal } from "./DeleteModal";
+import toast from "react-hot-toast";
+import { deleteUserAddress } from "../../store/actions";
 
 const AddressInfo = ({ address }) => {
     const noAddressExist = !address || address.length === 0;
-    const { isLoading } = useSelector((state) => state.errors);
+    const { isLoading, btnLoader } = useSelector((state) => state.errors);
 
     const [openAddressModal, setOpenAddressModal] = useState(false);
-    const [selectedAddress, setSelectedAddress] = useState("");
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+
+    const dispatch = useDispatch();
 
     const addNewAddressHandler = () => {
-        setSelectedAddress("");
+        setSelectedAddress(null);
         setOpenAddressModal(true);
+    };
+
+    const deleteAddressHandler = () => {
+        if (!selectedAddress?.addressId) {
+            toast.error("No address selected for deletion.");
+            return;
+        }
+
+        console.log("Selected Address for Deletion:", selectedAddress);
+
+        dispatch(deleteUserAddress({ 
+            toast, 
+            addressId: selectedAddress?.addressId, 
+            setOpenDeleteModal 
+        }));
     };
 
     return (
@@ -44,9 +65,10 @@ const AddressInfo = ({ address }) => {
                             <>
                                 <div className="p-4 border rounded-md bg-gray-100">
                                     <AddressList
-                                        addresses={address} // ✅ Renamed for consistency
+                                        addresses={address} 
                                         setSelectedAddress={setSelectedAddress}
                                         setOpenAddressModal={setOpenAddressModal}
+                                        setOpenDeleteModal={setOpenDeleteModal}
                                     />
                                 </div>
 
@@ -66,9 +88,19 @@ const AddressInfo = ({ address }) => {
                 )}
             </div>
 
+            {/* Address Form Modal */}
             <AddressInfoModal open={openAddressModal} setOpen={setOpenAddressModal}>
                 <AddAddressForm address={selectedAddress} setOpenAddressModal={setOpenAddressModal} />
             </AddressInfoModal>
+
+            {/* Delete Confirmation Modal */}
+            <DeleteModal
+                open={openDeleteModal}
+                loader={btnLoader}
+                setOpen={setOpenDeleteModal}
+                title="Delete Address"
+                onDeleteHandler={deleteAddressHandler}
+            />
         </div>
     );
 };

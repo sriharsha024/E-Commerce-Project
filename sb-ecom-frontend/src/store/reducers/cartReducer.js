@@ -28,6 +28,14 @@ export const cartReducer = (state = initialState, action) => {
             );
             return { ...state, cart: updatedCart };
         }
+        case "GET_USER_CART_PRODUCTS":{
+            return {
+                ...state,
+                cart:action.payload,
+                totalPrice:action.totalPrice,
+                cartId:action.cartId,
+            }
+        }
 
         default:
             return state;
