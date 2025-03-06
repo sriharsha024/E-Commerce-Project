@@ -53,7 +53,7 @@ const Cart = () => {
 
             <div className="mt-6 flex flex-col items-end border-t pt-4">
                 <div className="text-lg font-semibold">
-                    <span>Subtotal: ₹{totalPrice}</span>
+                    <span>Subtotal: ₹{totalPrice?.toFixed(2)}</span>
                 </div>
                 <p className="text-gray-500 text-sm mt-1 text-right">
                     Taxes and shipping calculated at checkout

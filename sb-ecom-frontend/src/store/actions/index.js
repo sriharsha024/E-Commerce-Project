@@ -58,78 +58,51 @@ export const fetchCategories = () => async (dispatch) => {
         });
     }
 };
-
-export const addToCart=(data,qty=1,toast)=>
-    (dispatch,getState)=>{
-        const {products}=getState().products;
-        const getProduct=products.find(
-            (item)=>item.productId===data.productId
-        );
-
-        const isQuantityExist=getProduct.quantity>=qty;
-
-        if(isQuantityExist){
-            dispatch({type:"ADD_CART",payload:{...data,quantity:qty}});
-            toast.success(`${data.productName} added to cart.`)
-            localStorage.setItem("cartItems",JSON.stringify(getState().carts.cart));
-        }
-        else{
-            toast.error("Out of stock")
-        }
-    
-}
-
-export const increaseCartQuantity = (data) => (dispatch, getState) => {
+// Action to add product to cart
+export const addToCart = (data, qty = 1, toast) => (dispatch, getState) => {
     const { products } = getState().products;
-    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    const productInStore = products.find((item) => item.productId === data.productId);
 
-    const getProduct = products.find(item => item.productId === data.productId);
-    if (!getProduct) return;
+    if (productInStore && productInStore.quantity >= qty) {
+        dispatch({ type: "ADD_CART", payload: { ...data, quantity: qty } });
+        toast.success(`${data.productName} added to cart.`);
+        localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart));
+    } else {
+        toast.error("Out of stock");
+    }
+};
 
-    let existingItem = cartItems.find(item => item.productId === data.productId);
-    let currentQuantity = existingItem ? existingItem.quantity : 0;
+// Action to increase quantity of item in the cart
+export const increaseCartQuantity = (productId) => (dispatch, getState) => {
+    const updatedCart = getState().carts.cart.map((item) =>
+        item.productId === productId ? { ...item, quantity: item.quantity + 1 } : item
+    );
+    dispatch({ type: "UPDATE_CART", payload: updatedCart });
+};
 
-    if (getProduct.quantity > currentQuantity) {
-        const newQuantity = currentQuantity + 1;
-        dispatch({
-            type: "ADD_CART",
-            payload: { ...data, quantity: newQuantity },
-        });
+// Action to decrease quantity of item in the cart
+export const decreaseCartQuantity = (productId) => (dispatch, getState) => {
+    const cartItems = getState().carts.cart;
+    const item = cartItems.find((item) => item.productId === productId);
 
-        const updatedCart = cartItems.map(item =>
-            item.productId === data.productId ? { ...item, quantity: newQuantity } : item
+    if (item && item.quantity > 1) {
+        const updatedCart = cartItems.map((item) =>
+            item.productId === productId ? { ...item, quantity: item.quantity - 1 } : item
         );
+        dispatch({ type: "UPDATE_CART", payload: updatedCart });
         localStorage.setItem("cartItems", JSON.stringify(updatedCart));
     }
 };
 
-export const decreaseCartQuantity = (data) => (dispatch, getState) => {
-    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-    let existingItem = cartItems.find(item => item.productId === data.productId);
-    let currentQuantity = existingItem ? existingItem.quantity : 1;
-
-    if (currentQuantity > 1) {
-        const newQuantity = currentQuantity - 1;
-
-        dispatch({
-            type: "ADD_CART",
-            payload: { ...data, quantity: newQuantity },
-        });
-
-        const updatedCart = cartItems.map(item =>
-            item.productId === data.productId ? { ...item, quantity: newQuantity } : item
-        );
-        localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-    }
-};
-
+// Action to remove item from the cart
 export const removeFromCart = (productId, toast) => (dispatch, getState) => {
     dispatch({ type: "REMOVE_CART", payload: productId });
-
     toast.success("Item removed from cart.");
-    const updatedCart = getState().carts.cart.filter(item => item.productId !== productId);
+
+    const updatedCart = getState().carts.cart.filter((item) => item.productId !== productId);
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
 };
+
 
 export const authenticateSignInUser=(sendData,toast,reset,navigate,setLoader)=>async(dispatch)=>{
     try{
@@ -295,4 +268,41 @@ export const getUserCart = () => async (dispatch, getState) => {
             payload: error?.response?.data?.message || "Failed to fetch cart items",
          });
     }
+};
+
+export const createStripePaymentSecret 
+    = (totalPrice) => async (dispatch, getState) => {
+        try {
+            dispatch({ type: "IS_FETCHING" });
+            const { data } = await api.post("/order/stripe-client-secret", {
+                "amount": Number(totalPrice) * 100,
+                "currency": "rupee"
+              });
+            dispatch({ type: "CLIENT_SECRET", payload: data });
+              localStorage.setItem("client-secret", JSON.stringify(data));
+              dispatch({ type: "IS_SUCCESS" });
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.message || "Failed to create client secret");
+        }
+};
+
+
+export const stripePaymentConfirmation 
+    = (sendData, setErrorMesssage, setLoadng, toast) => async (dispatch, getState) => {
+        try {
+            const response  = await api.post("/order/users/payments/online", sendData);
+            if (response.data) {
+                localStorage.removeItem("CHECKOUT_ADDRESS");
+                localStorage.removeItem("cartItems");
+                localStorage.removeItem("client-secret");
+                dispatch({ type: "REMOVE_CLIENT_SECRET_ADDRESS"});
+                dispatch({ type: "CLEAR_CART"});
+                toast.success("Order Accepted");
+              } else {
+                setErrorMesssage("Payment Failed. Please try again.");
+              }
+        } catch (error) {
+            setErrorMesssage("Payment Failed. Please try again.");
+        }
 };
