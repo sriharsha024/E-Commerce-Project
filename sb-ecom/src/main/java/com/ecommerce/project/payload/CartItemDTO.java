@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItemDTO {
-    private Long cartItemId;
+    /*private Long cartItemId;
     private CartDTO cart;
     private ProductDTO product;
     private Integer quantity;
     private Double discount;
-    private Double productPrice;
+    private Double productPrice;*/
+    private Long productId;
+    private int quantity;
 }

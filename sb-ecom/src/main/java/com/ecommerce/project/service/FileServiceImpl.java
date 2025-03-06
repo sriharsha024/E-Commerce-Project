@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -18,12 +19,13 @@ public class FileServiceImpl implements FileService {
 
         String randomId = UUID.randomUUID().toString();
         String fileName = randomId.concat(originalFilename.substring(originalFilename.lastIndexOf(".")));
-        String filePath = path + File.separator + fileName;
-        File folder = new File(filePath);
-        if (!folder.exists()) {
-            folder.mkdir();
+        Path dirPath = Paths.get(path);
+        if (!Files.exists(dirPath)) {
+            Files.createDirectories(dirPath);
         }
-        Files.copy(file.getInputStream(), Paths.get(filePath));
+
+        Path filePath = dirPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath);
         return fileName;
     }
 }

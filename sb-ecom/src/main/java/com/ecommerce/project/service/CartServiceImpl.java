@@ -6,6 +6,7 @@ import com.ecommerce.project.model.Cart;
 import com.ecommerce.project.model.CartItem;
 import com.ecommerce.project.model.Product;
 import com.ecommerce.project.payload.CartDTO;
+import com.ecommerce.project.payload.CartItemDTO;
 import com.ecommerce.project.payload.ProductDTO;
 import com.ecommerce.project.repository.CartItemRepo;
 import com.ecommerce.project.repository.CartRepo;
@@ -38,6 +39,47 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private AuthUtil authUtil;
 
+
+    @Transactional
+    @Override
+    public String createorUpdateCartWithItems(List<CartItemDTO> cartItems) {
+        String emailId=authUtil.loggedInEmail();
+
+        Cart existingCart=cartRepo.findCartByEmail(emailId);
+        if(existingCart==null) {
+            existingCart=new Cart();
+            existingCart.setTotalPrice(0.0);
+            existingCart.setUser(authUtil.loggedInUser());
+            existingCart=cartRepo.save(existingCart);
+        }else{
+            cartItemRepo.deleteAllByCartId(existingCart.getCartId());
+        }
+
+        double totalPrice=0.0;
+
+        for(CartItemDTO cartItemDTO:cartItems) {
+            long productId=cartItemDTO.getProductId();
+            int quantity=cartItemDTO.getQuantity();
+
+            Product product=productRepo.findById(productId)
+                    .orElseThrow(()->new ResourceNotFoundException("Product","productId",productId));
+
+            //product.setQuantity(product.getQuantity()-quantity);
+            totalPrice=totalPrice+product.getSpecialProductPrice()*quantity;
+
+            CartItem cartItem=new CartItem();
+            cartItem.setProduct(product);
+            cartItem.setCart(existingCart);
+            cartItem.setQuantity(quantity);
+            cartItem.setProductPrice(product.getSpecialProductPrice());
+            cartItem.setDiscount(product.getDiscount());
+            cartItemRepo.save(cartItem);
+
+        }
+        existingCart.setTotalPrice(totalPrice);
+        cartRepo.save(existingCart);
+        return "Cart created/updated successfully";
+    }
 
     @Override
     public CartDTO addProductToCart(Long productId, Integer quantity) {

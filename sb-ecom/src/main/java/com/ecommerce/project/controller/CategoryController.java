@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-public class CategoryController {
+public class  CategoryController {
 
     @Autowired
     private CategoryService categoryService;
